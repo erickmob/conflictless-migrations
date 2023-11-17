@@ -33,10 +33,10 @@ jobs:
         run: |
           echo "MY_NEW_VERSION=$(awk "BEGIN {printf \"%.3f\n\", ${{ steps.get-versions.outputs.MY_CURRENT_VERSION }} + 0.001}")" >> "$GITHUB_OUTPUT"
 
-      - name: Find My Migration File
-        id: get-my-file-name
-        run: |
-          echo "MY_CURRENT_FILE=$(find flyway/live/migrations -type f -name V"${MY_CURRENT_VERSION}*.sql" -exec basename {} \;)" >> "$GITHUB_OUTPUT"
+      # - name: Find My Migration File
+      #   id: get-my-file-name
+      #   run: |
+      #     echo "MY_CURRENT_FILE=$(find flyway/live/migrations -type f -name V"${MY_CURRENT_VERSION}*.sql" -exec basename {} \;)" >> "$GITHUB_OUTPUT"
 
       - name: Log
         run: |
