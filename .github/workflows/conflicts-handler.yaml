@@ -13,9 +13,10 @@ jobs:
     if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
     env:
       LATEST_MAIN_VERSION: ''
-      MY_VERSION: ''
+      MY_CURRENT_VERSION: ''
+      MY_CURRENT_VERSION_DESCRIPTION: ''
       MY_NEW_VERSION: ''
-      MY_FILE: ''
+      MY_CURRENT_FILE: ''
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3 
@@ -24,18 +25,23 @@ jobs:
         id: get-versions
         run: |
           echo "LATEST_MAIN_VERSION=$(git show main:flyway/version.log | grep -oE '[0-9]+\.[0-9]+' | tail -n 1)" >> "$GITHUB_OUTPUT"
-          echo "MY_VERSION=$(git show flyway/version.log | grep -oE '[0-9]+\.[0-9]+' | tail -n 1)" >> "$GITHUB_OUTPUT"
+          echo "MY_CURRENT_VERSION=$(tail -n 1 flyway/version.log | awk -F', ' '{print $1}')" >> "$GITHUB_OUTPUT"
+          echo "MY_CURRENT_VERSION_DESCRIPTION=$(tail -n 1 flyway/version.log | awk -F', ' '{print $1}')" >> "$GITHUB_OUTPUT"
 
-      - name: Set new Version
+      - name: Set New Version
         id: set-new-versions
         run: |
-          echo "${{ steps.get-versions.outputs.LATEST_MAIN_VERSION }}"
-          echo "${{ steps.get-versions.outputs.MY_VERSION }}"
-          echo "${{ steps.get-versions.outputs.MY_NEW_VERSION }}"
-          echo "MY_NEW_VERSION=$(awk "BEGIN {printf \"%.3f\n\", ${{ steps.get-versions.outputs.MY_VERSION }} + 0.001}")" >> "$GITHUB_OUTPUT"
+          echo "MY_NEW_VERSION=$(awk "BEGIN {printf \"%.3f\n\", ${{ steps.get-versions.outputs.MY_CURRENT_VERSION }} + 0.001}")" >> "$GITHUB_OUTPUT"
 
-      - name: Log Versions
+      - name: Find My Migration File
+        id: get-my-file-name
+        run: |
+          echo "MY_CURRENT_FILE=$(find flyway/live/migrations -type f -name V"${MY_CURRENT_VERSION}*.sql" -exec basename {} \;)" >> "$GITHUB_OUTPUT"
+
+      - name: Log
         run: |
           echo "${{ steps.get-versions.outputs.LATEST_MAIN_VERSION }}"
-          echo "${{ steps.get-versions.outputs.MY_VERSION }}"
+          echo "${{ steps.get-versions.outputs.MY_CURRENT_VERSION }}"
+          echo "${{ steps.get-versions.outputs.MY_CURRENT_VERSION_DESCRIPTION }}"
           echo "${{ steps.set-new-versions.outputs.MY_NEW_VERSION }}"
+          echo "${{ steps.get-my-file-name.outputs.MY_CURRENT_FILE }}"
