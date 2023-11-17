@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ success() && github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
     needs: automate-after-merge
-    - env:
+    env:
       LATEST_MAIN_VERSION: ${{needs.job1.outputs.output1}}
       MY_VERSION: ${{needs.job1.outputs.output2}}
     steps:
