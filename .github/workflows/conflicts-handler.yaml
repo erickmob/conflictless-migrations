@@ -11,9 +11,6 @@ jobs:
   automate-after-merge:
     runs-on: ubuntu-latest
     if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
-    outputs:
-      LATEST_MAIN_VERSION: ${{ steps.set-versions.outputs.LATEST_MAIN_VERSION }}
-      MY_VERSION: ${{ steps.set-versions.outputs.MY_VERSION }}
     env:
       LATEST_MAIN_VERSION: ''
       MY_VERSION: ''
@@ -23,26 +20,22 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3 
 
-      - name: Set Versions
-        id: set-versions
+      - name: Get Versions
+        id: get-versions
         run: |
-          echo "My Last Version is: git show main:flyway/version.log | grep -oE '[0-9]+\.[0-9]+' | tail -n 1"
-          echo "My version: git show flyway/version.log | grep -oE '[0-9]+\.[0-9]+' | tail -n 1"
           echo "LATEST_MAIN_VERSION=$(git show main:flyway/version.log | grep -oE '[0-9]+\.[0-9]+' | tail -n 1)" >> "$GITHUB_OUTPUT"
           echo "MY_VERSION=$(git show flyway/version.log | grep -oE '[0-9]+\.[0-9]+' | tail -n 1)" >> "$GITHUB_OUTPUT"
-  handler-version:
-    runs-on: ubuntu-latest
-    if: ${{ success() && github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
-    needs: automate-after-merge
-    env:
-      LATEST_MAIN_VERSION: ${{needs.job1.outputs.output1}}
-      MY_VERSION: ${{needs.job1.outputs.output2}}
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3 
 
-      - name: Set Versions
-        id: show-versions
+      - name: Set new Version
+        id: set-new-versions
         run: |
-          echo "My Last Version is: $LATEST_MAIN_VERSION"
-          echo "MY_VERSION"
+          echo "${{ steps.get-versions.outputs.LATEST_MAIN_VERSION }}"
+          echo "${{ steps.get-versions.outputs.MY_VERSION }}"
+          echo "${{ steps.get-versions.outputs.MY_NEW_VERSION }}"
+          echo "MY_NEW_VERSION=$(awk "BEGIN {printf \"%.3f\n\", ${{ steps.get-versions.outputs.MY_VERSION }} + 0.001}")" >> "$GITHUB_OUTPUT"
+
+      - name: Log Versions
+        run: |
+          echo "${{ steps.get-versions.outputs.LATEST_MAIN_VERSION }}"
+          echo "${{ steps.get-versions.outputs.MY_VERSION }}"
+          echo "${{ steps.set-new-versions.outputs.MY_NEW_VERSION }}"
