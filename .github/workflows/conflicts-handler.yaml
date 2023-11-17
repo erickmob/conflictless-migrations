@@ -26,17 +26,17 @@ jobs:
         run: |
           echo "LATEST_MAIN_VERSION=$(git show main:flyway/version.log | grep -oE '[0-9]+\.[0-9]+' | tail -n 1)" >> "$GITHUB_OUTPUT"
           echo "MY_CURRENT_VERSION=$(tail -n 1 flyway/version.log | awk -F', ' '{print $1}')" >> "$GITHUB_OUTPUT"
-          echo "MY_CURRENT_VERSION_DESCRIPTION=$(tail -n 1 flyway/version.log | awk -F', ' '{print $1}')" >> "$GITHUB_OUTPUT"
+          echo "MY_CURRENT_VERSION_DESCRIPTION=$(tail -n 1 flyway/version.log | awk -F', ' '{print $2}')" >> "$GITHUB_OUTPUT"
 
       - name: Set New Version
         id: set-new-versions
         run: |
           echo "MY_NEW_VERSION=$(awk "BEGIN {printf \"%.3f\n\", ${{ steps.get-versions.outputs.MY_CURRENT_VERSION }} + 0.001}")" >> "$GITHUB_OUTPUT"
 
-      # - name: Find My Migration File
-      #   id: get-my-file-name
-      #   run: |
-      #     echo "MY_CURRENT_FILE=$(find flyway/live/migrations -type f -name V"${MY_CURRENT_VERSION}*.sql" -exec basename {} \;)" >> "$GITHUB_OUTPUT"
+      - name: Find My Migration File
+        id: get-my-file-name
+        run: |
+          echo "MY_CURRENT_FILE=$(find flyway/live/migrations -type f -name V"${{ steps.get-versions.outputs.MY_CURRENT_VERSION }}*.sql" -exec basename {} \;)" >> "$GITHUB_OUTPUT"
 
       - name: Log
         run: |
