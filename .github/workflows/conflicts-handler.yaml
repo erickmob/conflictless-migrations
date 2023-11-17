@@ -1,0 +1,28 @@
+name: Automate After Merge
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  automate-after-merge:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
+    env:
+      LATEST_MAIN_VERSION: ''
+      MY_VERSION: ''
+      MY_NEW_VERSION: ''
+      MY_FILE: ''
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3 
+
+        run: |
+          echo "LATEST_MAIN_VERSION=$(git show master:flyway/version.log | grep -oE '[0-9]+\.[0-9]+' | tail -n 1)" >> "$GITHUB_OUTPUT"
+          echo "MY_VERSION=$(git show flyway/version.log | grep -oE '[0-9]+\.[0-9]+' | tail -n 1)" >> "$GITHUB_OUTPUT"
+
+      - name: Log Versions
+        run: |
+          echo $LATEST_MAIN_VERSION
+          echo $MY_VERSION
