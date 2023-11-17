@@ -28,5 +28,5 @@ jobs:
 
       - name: Log Versions
         run: |
-          echo "${{ steps.outputs.LATEST_MAIN_VERSION }}"
-          echo "${{ steps.outputs.MY_VERSION }}"
+          echo "${{ steps.set-versions.outputs.LATEST_MAIN_VERSION }}"
+          echo "${{ steps.set-versions.outputs.MY_VERSION }}"
