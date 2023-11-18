@@ -37,7 +37,22 @@ jobs:
         id: get-my-file-name
         run: |
           echo "MY_CURRENT_FILE=$(find flyway/live/migrations -type f -name V"${{ steps.get-versions.outputs.MY_CURRENT_VERSION }}*.sql" -exec basename {} \;)" >> "$GITHUB_OUTPUT"
-
+      
+      - name: Get main changes To Version File
+        id: main-version-file
+        run: |
+          git checkout main -- flyway/version.log
+          
+      - name: Add My New Verion To Version File
+        id: add-my-version
+        run: |
+          echo -n -e "\n${MY_NEW_VERSION}, ${MY_CURRENT_VERSION_DESCRIPTION}" >> flyway/version.log
+          
+      - name: Show Version File
+        id: show-version-file
+        run: |
+          cat flyway/version.log
+          
       - name: Log
         run: |
           echo "${{ steps.get-versions.outputs.LATEST_MAIN_VERSION }}"
