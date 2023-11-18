@@ -46,7 +46,7 @@ jobs:
       - name: Add My New Verion To Version File
         id: add-my-version
         run: |
-          echo -n -e "\n${MY_NEW_VERSION}, ${MY_CURRENT_VERSION_DESCRIPTION}" >> flyway/version.log
+          echo -n -e "\n${{ steps.set-new-versions.outputs.MY_NEW_VERSION }}, ${{ steps.get-versions.outputs.MY_CURRENT_VERSION_DESCRIPTION }}" >> flyway/version.log
           
       - name: Show Version File
         id: show-version-file
